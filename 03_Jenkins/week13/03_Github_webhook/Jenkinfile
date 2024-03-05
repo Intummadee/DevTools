@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Define variables
-        DOCKER_IMAGE       = 'kataroja1/fastapi-webhook:latest'
+        DOCKER_IMAGE = 'kataroja1/fastapi-webhook:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
         DOCKER_CREDENTIALS_USR = "${DOCKER_CREDENTIALS_USR}"
         DOCKER_CREDENTIALS_PSW = "${DOCKER_CREDENTIALS_PSW}"
@@ -15,7 +15,7 @@ pipeline {
                 // Checkout your source code from version control
                 script {
                     echo 'Start Jenkins............'
-                    echo "docker : user = $DOCKER_CREDENTIALS_USR : password = $DOCKER_CREDENTIALS_PSW"
+                    echo "docker : user = \$DOCKER_CREDENTIALS_USR : password = \$DOCKER_CREDENTIALS_PSW"
                 }
             }
         }
@@ -25,9 +25,9 @@ pipeline {
                 // Build the Docker image
                 dir('./03_Jenkins/week13/03_Github_webhook') {
                     script {
-                        echo "Running in $(pwd)"
-                        echo "start build the Docker image = $DOCKER_IMAGE"
-                        sh 'docker build -t $DOCKER_IMAGE .'
+                        echo "Running in \$(pwd)"
+                        echo "start build the Docker image = \$DOCKER_IMAGE"
+                        sh "docker build -t \$DOCKER_IMAGE ."
                     }
                 }   
             }
@@ -38,9 +38,9 @@ pipeline {
                 script {
                     // Login to Docker Hub
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_CREDENTIALS_USR', passwordVariable: 'DOCKER_CREDENTIALS_PSW')]) {
-                        echo "$DOCKER_CREDENTIALS_PSW" | docker login --username "$DOCKER_CREDENTIALS_USR" --password-stdin
+                        echo "\$DOCKER_CREDENTIALS_PSW" | docker login --username "\$DOCKER_CREDENTIALS_USR" --password-stdin
                         // Push the image
-                        sh 'docker push $DOCKER_IMAGE'
+                        sh "docker push \$DOCKER_IMAGE"
                     }
                 }
             }
@@ -51,8 +51,8 @@ pipeline {
                 script {
                     // Remove Docker images and containers
                     sh 'docker stop $(docker ps -a -q)'  
-                    sh  'docker rm $(docker ps -a -q)' 
-                    sh  'docker rmi $(docker images -q)'
+                    sh 'docker rm $(docker ps -a -q)' 
+                    sh 'docker rmi $(docker images -q)'
                     sh 'docker system prune -af'
                 }
             }
@@ -62,9 +62,9 @@ pipeline {
             steps {
                 script {
                     // Pull the Docker image from Docker Hub
-                    sh 'docker pull $DOCKER_IMAGE'
+                    sh "docker pull \$DOCKER_IMAGE"
                     // Run the Docker container
-                    sh 'docker run -d --name fastapi-webhook -p 8085:80 $DOCKER_IMAGE'
+                    sh "docker run -d --name fastapi-webhook -p 8085:80 \$DOCKER_IMAGE"
                 }
             }
         }
