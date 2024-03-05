@@ -5,7 +5,8 @@ pipeline {
         // Define variables
         DOCKER_IMAGE       = 'kataroja1/fastapi-webhook:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
-
+        DOCKER_CREDENTIALS_USR = DOCKER_CREDENTIALS_USR
+        DOCKER_CREDENTIALS_PSW = DOCKER_CREDENTIALS_PSW
     }
 
     stages {
@@ -36,9 +37,11 @@ pipeline {
                 script {
                     
                     // Login to Docker Hub
-                    sh 'echo $DOCKER_CREDENTIALS_PSW | docker login --username $DOCKER_CREDENTIALS_USR --password-stdin'
-                    // Push the image
-                    sh 'docker push $DOCKER_IMAGE'
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_CREDENTIALS_USR', passwordVariable: 'DOCKER_CREDENTIALS_PSW')]) {
+                        sh 'echo $DOCKER_CREDENTIALS_PSW | docker login --username $DOCKER_CREDENTIALS_USR --password-stdin'
+                        // Push the image
+                        sh 'docker push $DOCKER_IMAGE'
+                    }
                 }
             }
         }
