@@ -3,8 +3,10 @@ pipeline {
 
     environment {
         // Define variables
-        DOCKER_IMAGE = 'kataroja/fastapi-webhook:latest'
+        DOCKER_IMAGE = 'kataroja1/fastapi-webhook:latest'
         DOCKER_CREDENTIALS = credentials('dockerhub')
+        DOCKER_CREDENTIALS_USR = DOCKER_CREDENTIALS_USR // Update this line
+        DOCKER_CREDENTIALS_PSW = DOCKER_CREDENTIALS_PSW // Update this line
     }
 
     stages {
@@ -32,42 +34,4 @@ pipeline {
                 script {
                     // Login to Docker Hub
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_CREDENTIALS_USR', passwordVariable: 'DOCKER_CREDENTIALS_PSW')]) {
-                        sh 'echo ${DOCKER_CREDENTIALS_PSW} | docker login --username ${DOCKER_CREDENTIALS_USR} --password-stdin'
-                        // Push the image
-                        sh "docker push ${DOCKER_IMAGE}"
-                    }
-                }
-            }
-        }
-
-        stage('Clear Docker Components') {
-            steps {
-                script {
-                    // Remove Docker images and containers
-                    sh 'docker stop $(docker ps -a -q)'
-                    sh 'docker rm $(docker ps -a -q)'
-                    sh 'docker rmi $(docker images -q)'
-                    sh 'docker system prune -af'
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    // Pull the Docker image from Docker Hub
-                    sh "docker pull ${DOCKER_IMAGE}"
-                    // Run the Docker container
-                    sh "docker run -d --name fastapi-webhook -p 8085:80 ${DOCKER_IMAGE}"
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            // Logout from Docker Hub
-            sh 'docker logout'
-        }
-    }
-}
+           
